@@ -79,6 +79,9 @@ MetaParams::MetaParams() {
 	iBanTimeframe = 120;
 	iBanTime = 300;
 
+    // Emote directory and a Map of emote names to Emote objects
+    emotesMap = QMap<QString, Emote>();
+
 #ifdef Q_OS_UNIX
 	uiUid = uiGid = 0;
 #endif
@@ -95,6 +98,31 @@ MetaParams::MetaParams() {
 
 MetaParams::~MetaParams() {
 	delete qsSettings;
+}
+
+QMap<QString, Emote> MetaParams::setupEmotesMap() {
+    // Use the emotesDir config setting to create a map of Emote objects with names based on
+    // the image filename
+    // TODO: Make this recursively search directories
+    
+    // Check if param is actually a directory before iterating?
+    // Or will getting the list of files be empty
+    QMap<QString, Emote> newMap = QMap<QString, Emote>();
+    QDir oldCurrent = QDir::current();
+    QDir::setCurrent(QCoreApplication::instance()->applicationDirPath());
+
+    QDir emotesQDir(this->emotesDir);
+    emotesQDir.makeAbsolute();
+    this->emotesDir = emotesQDir.absolutePath();
+
+    QStringList emoteFileList = emotesQDir.entryList(QDir::Files);
+    foreach (const QString &curFilename, emoteFileList) {
+        Emote newEmote = Emote(curFilename);
+        newMap.insert(newEmote.name, newEmote);
+    }
+
+    QDir::setCurrent(oldCurrent.absolutePath());
+    return newMap;
 }
 
 /**
@@ -308,6 +336,12 @@ void MetaParams::read(QString fname) {
 	iBanTries = typeCheckedFromSettings("autobanAttempts", iBanTries);
 	iBanTimeframe = typeCheckedFromSettings("autobanTimeframe", iBanTimeframe);
 	iBanTime = typeCheckedFromSettings("autobanTime", iBanTime);
+    
+    // Setup emotes Map here
+    emotesEnabled = typeCheckedFromSettings("emotesEnabled", emotesEnabled);
+    emotesDir = typeCheckedFromSettings("emotesDir", emotesDir);
+    this->setupEmotesMap();
+
 
 	qvSuggestVersion = MumbleVersion::getRaw(qsSettings->value("suggestVersion").toString());
 	if (qvSuggestVersion.toUInt() == 0)

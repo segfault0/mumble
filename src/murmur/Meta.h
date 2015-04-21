@@ -43,6 +43,7 @@
 #endif
 
 #include "Timer.h"
+#include "Emote.h"
 
 class Server;
 class QSettings;
@@ -79,6 +80,10 @@ public:
 	int iBanTries;
 	int iBanTimeframe;
 	int iBanTime;
+
+    bool emotesEnabled;
+    QString emotesDir;
+    QMap<QString, Emote> emotesMap;
 
 	QString qsDatabase;
 	QString qsDBDriver;
@@ -118,6 +123,8 @@ public:
 
 	QMap<QString, QString> qmConfig;
 
+	//QMap
+
 #ifdef Q_OS_UNIX
 	unsigned int uiUid, uiGid;
 	QString qsHome;
@@ -137,6 +144,7 @@ public:
 private:
 		template <class T>
 		T typeCheckedFromSettings(const QString &name, const T &variable);
+        QMap<QString, Emote> setupEmotesMap();
 };
 
 class Meta : public QObject {

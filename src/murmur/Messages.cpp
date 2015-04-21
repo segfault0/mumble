@@ -41,6 +41,10 @@
 #include "Server.h"
 #include "ServerUser.h"
 #include "Version.h"
+#include "Emote.h"
+#include "Meta.h"
+#include <QtCore/QDir>
+#include <QtCore/QCoreApplication>
 
 #define MSG_SETUP(st) \
 	if (uSource->sState != st) { \
@@ -1101,6 +1105,19 @@ void Server::msgTextMessage(ServerUser *uSource, MumbleProto::TextMessage &msg) 
 	QString text = u8(msg.message());
 	bool changed = false;
 
+	// TODO: Should actually look for spaces around it I think
+	// Will need a regex to match twitch replace
+    // Something like [^ ]Kappa[ $]
+    //Emote dadPuck = Emote(QString("/home/bauer/play/murmur/mumble/release/emotes/dadPuck.png"));
+    //log(QCoreApplication::instance()->applicationDirPath() + "/emotes/dadPuck.png");
+    Emote dadPuck = Emote(QString(QCoreApplication::instance()->applicationDirPath() + "/emotes/dadPuck.png"));
+    //log(dadPuck.filename);
+    //log(dadPuck.name);
+    log(Meta::mp.emotesDir);
+    QString msgStr = QString::fromStdString(msg.message());
+    msgStr = dadPuck.insertEmote(msgStr);
+    msg.set_message(msgStr.toStdString());
+
 	if (! isTextAllowed(text, changed)) {
 		PERM_DENIED_TYPE(TextTooLong);
 		return;
@@ -1180,7 +1197,7 @@ void Server::msgTextMessage(ServerUser *uSource, MumbleProto::TextMessage &msg) 
 		tm.qlSessions.append(session);
 	}
 
-	users.remove(uSource);
+	//users.remove(uSource);
 
 	foreach(ServerUser *u, users)
 		sendMessage(u, msg);
