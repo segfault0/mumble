@@ -1105,18 +1105,20 @@ void Server::msgTextMessage(ServerUser *uSource, MumbleProto::TextMessage &msg) 
 	QString text = u8(msg.message());
 	bool changed = false;
 
-	// TODO: Should actually look for spaces around it I think
-	// Will need a regex to match twitch replace
-    // Something like [^ ]Kappa[ $]
-    //Emote dadPuck = Emote(QString("/home/bauer/play/murmur/mumble/release/emotes/dadPuck.png"));
-    //log(QCoreApplication::instance()->applicationDirPath() + "/emotes/dadPuck.png");
-    Emote dadPuck = Emote(QString(QCoreApplication::instance()->applicationDirPath() + "/emotes/dadPuck.png"));
-    //log(dadPuck.filename);
-    //log(dadPuck.name);
-    log(Meta::mp.emotesDir);
+
+    // Begin emote replacement
     QString msgStr = QString::fromStdString(msg.message());
-    msgStr = dadPuck.insertEmote(msgStr);
+
+    QMap<QString, Emote>::iterator i;
+    for(i = Meta::mp.emotesMap.begin(); i != Meta::mp.emotesMap.end(); i++) {
+        if(msgStr.contains(i.key())) {
+            msgStr = i.value().insertEmote(msgStr);
+        }
+    }
+
     msg.set_message(msgStr.toStdString());
+    // End emote replacement
+
 
 	if (! isTextAllowed(text, changed)) {
 		PERM_DENIED_TYPE(TextTooLong);

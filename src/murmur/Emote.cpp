@@ -13,10 +13,6 @@ Emote::Emote() {
     data64 = "";
 }
 
-//Emote::Emote(std::string filename) {
-//    this->Emote(QString(filename));
-//}
-
 // Read the picture file at the given filename, convert to base64, and store it in the
 // member variable data64
 Emote::Emote(QString aFilename) {
@@ -33,6 +29,10 @@ Emote::Emote(QString aFilename) {
 }
 
 QString Emote::insertEmote(QString msg) {
+    /* TODO: Should actually look for spaces around it I think
+     * Will need a regex to match twitch replace
+     * Something like [^ ]Kappa[ $]
+     */
     int emoteStart = msg.indexOf(this->name);
     int emoteLength = this->name.length();
     while(emoteStart >= 0) {

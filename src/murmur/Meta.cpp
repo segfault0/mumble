@@ -79,9 +79,6 @@ MetaParams::MetaParams() {
 	iBanTimeframe = 120;
 	iBanTime = 300;
 
-    // Emote directory and a Map of emote names to Emote objects
-    emotesMap = QMap<QString, Emote>();
-
 #ifdef Q_OS_UNIX
 	uiUid = uiGid = 0;
 #endif
@@ -101,6 +98,7 @@ MetaParams::~MetaParams() {
 }
 
 QMap<QString, Emote> MetaParams::setupEmotesMap() {
+
     // Use the emotesDir config setting to create a map of Emote objects with names based on
     // the image filename
     // TODO: Make this recursively search directories
@@ -115,9 +113,11 @@ QMap<QString, Emote> MetaParams::setupEmotesMap() {
     emotesQDir.makeAbsolute();
     this->emotesDir = emotesQDir.absolutePath();
 
-    QStringList emoteFileList = emotesQDir.entryList(QDir::Files);
-    foreach (const QString &curFilename, emoteFileList) {
-        Emote newEmote = Emote(curFilename);
+    QDirIterator it(emotesQDir.path(), QStringList() << "*.png", QDir::Files, QDirIterator::Subdirectories);
+    while(it.hasNext()) {
+        it.next();
+
+        Emote newEmote = Emote(it.filePath());
         newMap.insert(newEmote.name, newEmote);
     }
 
@@ -340,7 +340,8 @@ void MetaParams::read(QString fname) {
     // Setup emotes Map here
     emotesEnabled = typeCheckedFromSettings("emotesEnabled", emotesEnabled);
     emotesDir = typeCheckedFromSettings("emotesDir", emotesDir);
-    this->setupEmotesMap();
+    emotesMap = this->setupEmotesMap();
+    //qDebug() << "After this->setupEmotesMap().";
 
 
 	qvSuggestVersion = MumbleVersion::getRaw(qsSettings->value("suggestVersion").toString());

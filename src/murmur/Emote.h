@@ -4,6 +4,9 @@
 
 #ifndef MUMBLE_MURMUR_EMOTE_H_
 #define MUMBLE_MURMUR_EMOTE_H_
+
+
+// TODO: Make most of the member variables private
 class Emote {
     public:
         //Emote(std::string);
